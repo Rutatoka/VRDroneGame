@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7c55af11a188324e964f5861acd8ae7, type: 3}
+  m_Name: MainLanguageData
+  m_EditorClassIdentifier: 
+  entries:
+  - key: main_title
+    russianText: "\u0420\u0415\u0410\u041B\u042C\u041D\u042B\u0419 \u0421\u0418\u041C\u0423\u041B\u042F\u0422\u041E\u0420
+      \u0414\u0420\u041E\u041D\u0410"
+    englishText: REAL DRONE SIMULATOR
+  - key: btn_change_lng
+    russianText: "\u0421\u043C\u0435\u043D\u0438\u0442\u044C \u044F\u0437\u044B\u043A"
+    englishText: Change language
+  - key: btn_start_game
+    russianText: "\u041D\u0430\u0447\u0430\u0442\u044C \u0438\u0433\u0440\u0443"
+    englishText: Start Game
+  - key: btn_exit_game
+    russianText: "\u0412\u044B\u0445\u043E\u0434"
+    englishText: Exit
+  - key: conf_title
+    russianText: "\u041A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F
+      \u0434\u0440\u043E\u043D\u0430"
+    englishText: Drone Configuration
+  - key: speed_conf
+    russianText: "\u041C\u0430\u043A\u0441. \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C
+      (\u043C/\u0441)"
+    englishText: Max speed (m/s)
+  - key: accel_conf
+    russianText: "\u0423\u0441\u043A\u043E\u0440\u0435\u043D\u0438\u0435 \u043C/\u04412"
+    englishText: "Acceleration \u043C/\u04412"
+  - key: Rota_conf
+    russianText: "\u0421\u043A\u043E\u0440\u043E\u0441\u0442\u044C \u0432\u0440\u0430\u0449\u0435\u043D\u0438\u044F
+      (\u0440\u0430\u0434/\u0441)"
+    englishText: Rotation speed (rad/s)
+  - key: Battery_conf
+    russianText: "\u0415\u043C\u043A\u043E\u0441\u0442\u044C \u0431\u0430\u0442\u0430\u0440\u0435\u0438
+      (mAh)"
+    englishText: Battery Life (mAh)
+  - key: Obstacle_conf
+    russianText: "\u0428\u0442\u0440\u0430\u0444 \u0437\u0430 \u043F\u0440\u0435\u043F\u044F\u0442\u0441\u0442\u0432\u0438\u0435
+      (\u043C) "
+    englishText: "Obstacle Penalty (\u043C)"
+  - key: Btn_Save
+    russianText: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"
+    englishText: Save config
+  - key: Btn_reset
+    russianText: "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E"
+    englishText: Reset to default
