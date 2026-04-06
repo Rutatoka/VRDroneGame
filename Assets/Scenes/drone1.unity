@@ -300,6 +300,7 @@ MonoBehaviour:
   menuSceneName: Menu
   droneSceneName: drone1
   slotSelectionSceneName: SlotSelectionScene
+  tutorialSceneName: TutorialScene
 --- !u!4 &44528941
 Transform:
   m_ObjectHideFlags: 0

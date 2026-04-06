@@ -1,12 +1,10 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
     [Header("UI Elements")]
-    [SerializeField] private TextMeshProUGUI configText;
     [SerializeField] private TextMeshProUGUI speedValueText;
     [SerializeField] private TextMeshProUGUI accelerationValueText;
     [SerializeField] private TextMeshProUGUI rotationValueText;
@@ -23,7 +21,7 @@ public class UIManager : MonoBehaviour
     [Header("Buttons")]
     [SerializeField] private Button saveButton;
     [SerializeField] private Button resetButton;
-    [SerializeField] private Button backButton;
+    [SerializeField] private Button playButton;  // Переименовал slotButton → playButton
 
     public static UIManager Instance { get; private set; }
 
@@ -49,23 +47,37 @@ public class UIManager : MonoBehaviour
         if (resetButton != null)
             resetButton.onClick.AddListener(ResetConfig);
 
-        if (backButton != null)
-            backButton.onClick.AddListener(BackToMenu);
+        if (playButton != null)
+            playButton.onClick.AddListener(OnPlayClick);
+
         SaveSlotManager.OnProfileChanged += OnProfileChanged;
     }
+
+    private void OnPlayClick()
+    {
+        AudioManager.Instance?.PlayButtonClick();
+        Debug.Log("Play button clicked - открываем выбор слота");
+
+        // Единый метод через GameManager
+        if (GameManager.Instance != null)
+            GameManager.Instance.OpenSlotSelection();
+        else
+            Debug.LogError("GameManager.Instance = null!");
+    }
+
     private void OnProfileChanged(SaveData data)
     {
         Debug.Log($"UIManager: Профиль изменён на {data.profileName}");
-              LoadFromCurrentProfile();
+        LoadFromCurrentProfile();
         LoadConfigToUI();
     }
+
     private void LoadFromCurrentProfile()
     {
         if (SaveSlotManager.Instance?.currentSave != null)
         {
             var settings = SaveSlotManager.Instance.currentSave.droneSettings;
 
-            // Применяем к ConfigManager
             if (ConfigManager.Instance?.DroneConfig != null)
             {
                 var config = ConfigManager.Instance.DroneConfig;
@@ -80,15 +92,10 @@ public class UIManager : MonoBehaviour
                 config.hoverForce = settings.hoverForce;
                 config.hoverStability = settings.hoverStability;
                 config.modelTiltAmount = settings.modelTiltAmount;
-
-                Debug.Log("Настройки загружены из профиля в ConfigManager");
             }
         }
-        else
-        {
-            Debug.Log("Нет активного профиля для загрузки настроек");
-        }
     }
+
     private void LoadConfigToUI()
     {
         if (ConfigManager.Instance?.DroneConfig == null) return;
@@ -102,7 +109,6 @@ public class UIManager : MonoBehaviour
         if (penaltyInput != null) penaltyInput.text = config.obstaclePenalty.ToString();
 
         UpdateDisplayTexts();
-        Debug.Log("UI обновлён из ConfigManager");
     }
 
     private void SaveConfig()
@@ -120,15 +126,10 @@ public class UIManager : MonoBehaviour
 
         UpdateDisplayTexts();
 
-        // Сохраняем в текущий профиль
         if (SaveSlotManager.Instance?.currentSave != null)
         {
             SaveSlotManager.Instance.SaveCurrentGame();
             Debug.Log("Настройки сохранены в профиль!");
-        }
-        else
-        {
-            Debug.LogWarning("Нет активного профиля для сохранения!");
         }
     }
 
@@ -140,11 +141,10 @@ public class UIManager : MonoBehaviour
         ConfigManager.Instance.DroneConfig.ResetToDefault();
         LoadConfigToUI();
 
-        // Сохраняем сброшенные настройки в профиль
         if (SaveSlotManager.Instance?.currentSave != null)
         {
             SaveSlotManager.Instance.SaveCurrentGame();
-            Debug.Log("Настройки сброшены и сохранены в профиль!");
+            Debug.Log("Настройки сброшены и сохранены!");
         }
     }
 
@@ -160,19 +160,6 @@ public class UIManager : MonoBehaviour
         if (penaltyValueText != null) penaltyValueText.text = $"{config.obstaclePenalty}";
     }
 
-    private void BackToMenu()
-    {
-
-        AudioManager.Instance?.PlayButtonClick();
-        if (SaveSlotManager.Instance?.currentSave != null)
-        {
-            SaveSlotManager.Instance.SaveCurrentGame();
-        }
-        if (GameManager.Instance != null)
-            GameManager.Instance.OpenSlotSelection();
-        else
-            SceneManager.LoadScene(0);
-    }
     private void OnDestroy()
     {
         SaveSlotManager.OnProfileChanged -= OnProfileChanged;

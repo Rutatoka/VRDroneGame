@@ -12,11 +12,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private string menuSceneName = "Menu";
     [SerializeField] private string droneSceneName = "drone1";
     [SerializeField] private string slotSelectionSceneName = "SlotSelectionScene";
+    [SerializeField] private string tutorialSceneName = "TutorialScene";
 
     private TMP_Text score_txt;
     private float levelStartTime;
     private bool isLevelActive = false;
-
     private int currentLevelScore = 0;
 
     private void Awake()
@@ -29,6 +29,37 @@ public class GameManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
+
+    // ========== ЕДИНЫЙ МЕТОД ДЛЯ ВСЕХ ПЕРЕХОДОВ ==========
+    public void LoadScene(string sceneName)
+    {
+        Debug.Log($"=== GameManager: Загрузка сцены {sceneName} ===");
+
+        // Сохраняем прогресс перед переходом
+        if (SaveSlotManager.Instance?.currentSave != null)
+        {
+            SaveSlotManager.Instance.SaveCurrentGame();
+        }
+
+        // Всегда через LoadingManager, если он есть
+        if (LoadingManager.Instance != null)
+        {
+            LoadingManager.Instance.LoadScene(sceneName);
+        }
+        else
+        {
+            Debug.LogWarning("LoadingManager не найден! Загружаем напрямую");
+            SceneManager.LoadScene(sceneName);
+        }
+    }
+
+    // ========== КОРОТКИЕ МЕТОДЫ-ОБЁРТКИ (для удобства) ==========
+    public void GoToMenu() => LoadScene(menuSceneName);
+    public void LoadDroneScene() => LoadScene(droneSceneName);
+    public void OpenSlotSelection() => LoadScene(slotSelectionSceneName);
+    public void OpenTutorial() => LoadScene(tutorialSceneName);
+
+    // ========== ОСТАЛЬНЫЕ МЕТОДЫ ==========
 
     public void StartLevel()
     {
@@ -63,15 +94,11 @@ public class GameManager : MonoBehaviour
                 save.totalScore = totalLevelScore;
                 Debug.Log($"НОВЫЙ РЕКОРД ОЧКОВ! {totalLevelScore}");
             }
-            else
-            {
-                Debug.Log($"Очки за уровень: {totalLevelScore}. Рекорд: {save.totalScore} (не побит)");
-            }
 
             SaveSlotManager.Instance.SaveCurrentGame();
         }
 
-        Debug.Log($"Уровень пройден! Время: {levelTime:F1} сек, Очки за уровень: {totalLevelScore}");
+        Debug.Log($"Уровень пройден! Время: {levelTime:F1} сек");
 
         OpenSlotSelection();
     }
@@ -79,27 +106,20 @@ public class GameManager : MonoBehaviour
     public void DroneDeath(string reason)
     {
         if (!isLevelActive) return;
-
         isLevelActive = false;
 
         LevelTimerUI timer = FindObjectOfType<LevelTimerUI>();
-        if (timer != null)
-        {
-            timer.StopTimer();
-        }
+        if (timer != null) timer.StopTimer();
 
         Debug.Log($"Дрон погиб! Причина: {reason}");
-
         OpenSlotSelection();
     }
 
     public void AddScore(int points)
     {
         AudioManager.Instance?.PlayCoinPickup();
-
         currentLevelScore += points;
         UpdateUI();
-        Debug.Log($"Добавлено {points} очков. Всего за уровень: {currentLevelScore}");
     }
 
     private void Update()
@@ -110,11 +130,6 @@ public class GameManager : MonoBehaviour
 
             if (activeScene.name == droneSceneName)
             {
-
-                if (SaveSlotManager.Instance?.currentSave != null)
-                {
-                    SaveSlotManager.Instance.SaveCurrentGame();
-                }
                 isLevelActive = false;
                 GoToMenu();
             }
@@ -132,17 +147,8 @@ public class GameManager : MonoBehaviour
     public void EventChecked(string nameEvent)
     {
         GameObject wallPath = GameObject.Find("wallPath");
-
-        switch (nameEvent)
-        {
-            case "EventObstacle":
-                if (wallPath != null) wallPath.SetActive(false);
-                Debug.Log("fff");
-                break;
-            default:
-                if (wallPath != null) wallPath.SetActive(true);
-                break;
-        }
+        if (wallPath != null)
+            wallPath.SetActive(nameEvent != "EventObstacle");
     }
 
     public void UpdateUI()
@@ -152,50 +158,13 @@ public class GameManager : MonoBehaviour
         {
             score_txt = scoreObject.GetComponent<TMP_Text>();
             if (score_txt != null)
-            {
                 score_txt.text = "Очки: " + currentLevelScore;
-            }
         }
     }
 
-    public int GetHighScore()
-    {
-        if (SaveSlotManager.Instance?.currentSave != null)
-        {
-            return SaveSlotManager.Instance.currentSave.totalScore;
-        }
-        return 0;
-    }
-
-    public float GetCurrentLevelTime()
-    {
-        if (!isLevelActive) return 0;
-        return Time.time - levelStartTime;
-    }
-
+    public int GetHighScore() => SaveSlotManager.Instance?.currentSave?.totalScore ?? 0;
+    public float GetCurrentLevelTime() => isLevelActive ? Time.time - levelStartTime : 0;
     public bool IsLevelActive() => isLevelActive;
-
-    public void GoToMenu()
-    {
-        Debug.Log("Переход в меню");
-        SceneManager.LoadScene(menuSceneName);
-    }
-
-    public void LoadDroneScene()
-    {
-        Debug.Log("Загрузка сцены с дроном");
-        SceneManager.LoadScene(droneSceneName);
-    }
-
-    public void OpenSlotSelection()
-    {
-        Debug.Log("Открытие выбора слота");
-        if (SaveSlotManager.Instance?.currentSave != null)
-        {
-            SaveSlotManager.Instance.SaveCurrentGame();
-        }
-        SceneManager.LoadScene(slotSelectionSceneName);
-    }
 
     public void QuitGame()
     {

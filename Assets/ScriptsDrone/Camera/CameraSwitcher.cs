@@ -200,8 +200,8 @@ public class CameraSwitcher : MonoBehaviour
         if (playerCamera != null)
         {
             playerCamera.enabled = false;
-            AudioListener playerListener = playerCamera.GetComponent<AudioListener>();
-            if (playerListener != null) playerListener.enabled = false;
+          //  AudioListener playerListener = playerCamera.GetComponent<AudioListener>();
+          //  if (playerListener != null) playerListener.enabled = false;
         }
 
         if (droneCamera != null)

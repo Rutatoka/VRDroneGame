@@ -9,8 +9,14 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: 841f32227ca77be46a3859cb35772dbe
   - enabled: 1
+    path: Assets/Scenes/TutorialScene.unity
+    guid: 2add75cff9339674887f4b0f2f8c022a
+  - enabled: 1
     path: Assets/Scenes/SlotSelectionScene.unity
     guid: b1268911c7732b746ab4ee1c7158c9c0
+  - enabled: 1
+    path: Assets/Scenes/LoadingScene.unity
+    guid: 26362cf5b7bfdea468226d3c13c7271a
   - enabled: 1
     path: Assets/Scenes/drone1.unity
     guid: 1efcee153325d42479890e5df781db35

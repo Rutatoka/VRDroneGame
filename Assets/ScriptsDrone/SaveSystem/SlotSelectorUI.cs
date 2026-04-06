@@ -27,7 +27,7 @@ public class SlotSelectorUI : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("SlotSelectorUI Start - проверка SaveSlotManager");
+  
 
         if (SaveSlotManager.Instance == null)
         {
@@ -162,26 +162,36 @@ public class SlotSelectorUI : MonoBehaviour
 
         SaveSlotManager.Instance.SaveCurrentGame();
 
+        // Проверяем, пройдено ли обучение
+        bool hasCompletedTutorial = PlayerPrefs.GetInt("TutorialCompleted", 0) == 1;
+
+        if (SaveSlotManager.Instance?.currentSave != null)
+        {
+            if (SaveSlotManager.Instance.currentSave.unlockedLevels.Contains("TutorialCompleted"))
+                hasCompletedTutorial = true;
+        }
+
+        // Единый метод через GameManager
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.LoadDroneScene();
+            if (!hasCompletedTutorial)
+                GameManager.Instance.OpenTutorial();
+            else
+                GameManager.Instance.LoadDroneScene();
         }
         else
         {
-            SceneManager.LoadScene(gameSceneName);
+            // Fallback
+            SceneManager.LoadScene(!hasCompletedTutorial ? "TutorialScene" : gameSceneName);
         }
     }
 
     void GoBack()
     {
         if (GameManager.Instance != null)
-        {
             GameManager.Instance.GoToMenu();
-        }
         else
-        {
             SceneManager.LoadScene(0);
-        }
     }
 
     void UpdateAllSlotsInfo()
