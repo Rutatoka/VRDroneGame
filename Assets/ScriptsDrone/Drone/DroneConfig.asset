@@ -20,6 +20,6 @@ MonoBehaviour:
   hoverHeight: 2
   hoverForce: 10
   hoverStability: 3
-  batteryLife: 2000
+  batteryLife: 6000
   obstaclePenalty: 10
   modelTiltAmount: 30

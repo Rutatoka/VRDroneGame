@@ -213,11 +213,11 @@ public class SlotSelectorUI : MonoBehaviour
             SaveData data = SaveSlotManager.Instance.LoadGame(slotIndex);
             int hours = data.playTime / 3600;
             int minutes = (data.playTime % 3600) / 60;
-
+            int seconds = data.playTime % 60;
             infoText.text = $"<b>{data.profileName}</b>\n" +
                            $" Рекорд: {data.bestTime:F1} сек\n" +
                            $" Очки: {data.totalScore}\n" +
-                           $" В игре: {hours:00}:{minutes:00}";
+                           $" Время игры в целом: {hours:00}:{minutes:00}:{seconds:00}";
         }
         else
         {

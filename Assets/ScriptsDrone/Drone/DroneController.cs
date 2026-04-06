@@ -194,6 +194,7 @@ public class DroneController : MonoBehaviour
 
     private void Start()
     {
+       
         LoadConfiguration();
         transform.rotation = Quaternion.identity;
         _gm = FindFirstObjectByType<GameManager>()?.GetComponent<GameManager>();
@@ -527,6 +528,7 @@ public class DroneController : MonoBehaviour
         {
             _gm?.AddScore(100);
             Destroy(other.gameObject);
+
         }
     }
 

@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class UIManager : MonoBehaviour
 {
     [Header("UI Elements")]
+    [SerializeField] private TextMeshProUGUI configText;
     [SerializeField] private TextMeshProUGUI speedValueText;
     [SerializeField] private TextMeshProUGUI accelerationValueText;
     [SerializeField] private TextMeshProUGUI rotationValueText;
@@ -38,7 +39,9 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        LoadFromCurrentProfile();
         LoadConfigToUI();
+        AudioManager.Instance?.PlayMenuMusic();
 
         if (saveButton != null)
             saveButton.onClick.AddListener(SaveConfig);
@@ -48,11 +51,48 @@ public class UIManager : MonoBehaviour
 
         if (backButton != null)
             backButton.onClick.AddListener(BackToMenu);
+        SaveSlotManager.OnProfileChanged += OnProfileChanged;
     }
+    private void OnProfileChanged(SaveData data)
+    {
+        Debug.Log($"UIManager: Профиль изменён на {data.profileName}");
+              LoadFromCurrentProfile();
+        LoadConfigToUI();
+    }
+    private void LoadFromCurrentProfile()
+    {
+        if (SaveSlotManager.Instance?.currentSave != null)
+        {
+            var settings = SaveSlotManager.Instance.currentSave.droneSettings;
 
+            // Применяем к ConfigManager
+            if (ConfigManager.Instance?.DroneConfig != null)
+            {
+                var config = ConfigManager.Instance.DroneConfig;
+                config.maxSpeed = settings.maxSpeed;
+                config.acceleration = settings.acceleration;
+                config.rotationSpeed = settings.rotationSpeed;
+                config.batteryLife = settings.batteryLife;
+                config.obstaclePenalty = settings.obstaclePenalty;
+                config.drag = settings.drag;
+                config.angularDrag = settings.angularDrag;
+                config.hoverHeight = settings.hoverHeight;
+                config.hoverForce = settings.hoverForce;
+                config.hoverStability = settings.hoverStability;
+                config.modelTiltAmount = settings.modelTiltAmount;
+
+                Debug.Log("Настройки загружены из профиля в ConfigManager");
+            }
+        }
+        else
+        {
+            Debug.Log("Нет активного профиля для загрузки настроек");
+        }
+    }
     private void LoadConfigToUI()
     {
         if (ConfigManager.Instance?.DroneConfig == null) return;
+
         var config = ConfigManager.Instance.DroneConfig;
 
         if (speedInput != null) speedInput.text = config.maxSpeed.ToString();
@@ -62,34 +102,50 @@ public class UIManager : MonoBehaviour
         if (penaltyInput != null) penaltyInput.text = config.obstaclePenalty.ToString();
 
         UpdateDisplayTexts();
+        Debug.Log("UI обновлён из ConfigManager");
     }
 
     private void SaveConfig()
     {
+        AudioManager.Instance?.PlayButtonClick();
         if (ConfigManager.Instance?.DroneConfig == null) return;
+
         var config = ConfigManager.Instance.DroneConfig;
 
-        if (speedInput != null && float.TryParse(speedInput.text, out float speed)) config.maxSpeed = speed;
-        if (accelerationInput != null && float.TryParse(accelerationInput.text, out float accel)) config.acceleration = accel;
-        if (rotationInput != null && float.TryParse(rotationInput.text, out float rotation)) config.rotationSpeed = rotation;
-        if (batteryInput != null && float.TryParse(batteryInput.text, out float battery)) config.batteryLife = battery;
-        if (penaltyInput != null && float.TryParse(penaltyInput.text, out float penalty)) config.obstaclePenalty = penalty;
+        if (float.TryParse(speedInput.text, out float speed)) config.maxSpeed = speed;
+        if (float.TryParse(accelerationInput.text, out float accel)) config.acceleration = accel;
+        if (float.TryParse(rotationInput.text, out float rotation)) config.rotationSpeed = rotation;
+        if (float.TryParse(batteryInput.text, out float battery)) config.batteryLife = battery;
+        if (float.TryParse(penaltyInput.text, out float penalty)) config.obstaclePenalty = penalty;
 
         UpdateDisplayTexts();
-        Debug.Log("Configuration saved!");
 
+        // Сохраняем в текущий профиль
         if (SaveSlotManager.Instance?.currentSave != null)
         {
             SaveSlotManager.Instance.SaveCurrentGame();
+            Debug.Log("Настройки сохранены в профиль!");
+        }
+        else
+        {
+            Debug.LogWarning("Нет активного профиля для сохранения!");
         }
     }
 
     private void ResetConfig()
     {
+        AudioManager.Instance?.PlayButtonClick();
         if (ConfigManager.Instance?.DroneConfig == null) return;
+
         ConfigManager.Instance.DroneConfig.ResetToDefault();
         LoadConfigToUI();
-        Debug.Log("Configuration reset to default!");
+
+        // Сохраняем сброшенные настройки в профиль
+        if (SaveSlotManager.Instance?.currentSave != null)
+        {
+            SaveSlotManager.Instance.SaveCurrentGame();
+            Debug.Log("Настройки сброшены и сохранены в профиль!");
+        }
     }
 
     private void UpdateDisplayTexts()
@@ -106,9 +162,19 @@ public class UIManager : MonoBehaviour
 
     private void BackToMenu()
     {
+
+        AudioManager.Instance?.PlayButtonClick();
+        if (SaveSlotManager.Instance?.currentSave != null)
+        {
+            SaveSlotManager.Instance.SaveCurrentGame();
+        }
         if (GameManager.Instance != null)
             GameManager.Instance.OpenSlotSelection();
         else
             SceneManager.LoadScene(0);
+    }
+    private void OnDestroy()
+    {
+        SaveSlotManager.OnProfileChanged -= OnProfileChanged;
     }
 }

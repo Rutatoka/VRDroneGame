@@ -13,6 +13,7 @@ public class SaveSlotManager : MonoBehaviour
     private string saveFolderPath;
     private byte xorKey = 0xAA;
     public SaveData currentSave;
+    private float totalGameTimer = 0f;
 
     private float autoSaveTimer = 0f;
     public float autoSaveInterval = 30f;
@@ -99,13 +100,23 @@ public class SaveSlotManager : MonoBehaviour
             return;
         }
 
+        // Сохраняем ВСЕ настройки из ConfigManager
         if (ConfigManager.Instance?.DroneConfig != null)
         {
-            currentSave.droneSettings.maxSpeed = ConfigManager.Instance.DroneConfig.maxSpeed;
-            currentSave.droneSettings.acceleration = ConfigManager.Instance.DroneConfig.acceleration;
-            currentSave.droneSettings.rotationSpeed = ConfigManager.Instance.DroneConfig.rotationSpeed;
-            currentSave.droneSettings.batteryLife = ConfigManager.Instance.DroneConfig.batteryLife;
-            currentSave.droneSettings.obstaclePenalty = ConfigManager.Instance.DroneConfig.obstaclePenalty;
+            var config = ConfigManager.Instance.DroneConfig;
+            currentSave.droneSettings.maxSpeed = config.maxSpeed;
+            currentSave.droneSettings.acceleration = config.acceleration;
+            currentSave.droneSettings.rotationSpeed = config.rotationSpeed;
+            currentSave.droneSettings.drag = config.drag;
+            currentSave.droneSettings.angularDrag = config.angularDrag;
+            currentSave.droneSettings.hoverHeight = config.hoverHeight;
+            currentSave.droneSettings.hoverForce = config.hoverForce;
+            currentSave.droneSettings.hoverStability = config.hoverStability;
+            currentSave.droneSettings.batteryLife = config.batteryLife;
+            currentSave.droneSettings.obstaclePenalty = config.obstaclePenalty;
+            currentSave.droneSettings.modelTiltAmount = config.modelTiltAmount;
+
+            Debug.Log("Настройки дрона сохранены в профиль");
         }
 
         SaveGame(currentSlot, currentSave);
@@ -136,11 +147,22 @@ public class SaveSlotManager : MonoBehaviour
     {
         if (ConfigManager.Instance?.DroneConfig != null && currentSave != null)
         {
-            ConfigManager.Instance.DroneConfig.maxSpeed = currentSave.droneSettings.maxSpeed;
-            ConfigManager.Instance.DroneConfig.acceleration = currentSave.droneSettings.acceleration;
-            ConfigManager.Instance.DroneConfig.rotationSpeed = currentSave.droneSettings.rotationSpeed;
-            ConfigManager.Instance.DroneConfig.batteryLife = currentSave.droneSettings.batteryLife;
-            ConfigManager.Instance.DroneConfig.obstaclePenalty = currentSave.droneSettings.obstaclePenalty;
+            var config = ConfigManager.Instance.DroneConfig;
+            var settings = currentSave.droneSettings;
+
+            config.maxSpeed = settings.maxSpeed;
+            config.acceleration = settings.acceleration;
+            config.rotationSpeed = settings.rotationSpeed;
+            config.drag = settings.drag;
+            config.angularDrag = settings.angularDrag;
+            config.hoverHeight = settings.hoverHeight;
+            config.hoverForce = settings.hoverForce;
+            config.hoverStability = settings.hoverStability;
+            config.batteryLife = settings.batteryLife;
+            config.obstaclePenalty = settings.obstaclePenalty;
+            config.modelTiltAmount = settings.modelTiltAmount;
+
+            Debug.Log("Настройки дрона загружены из профиля");
         }
     }
 
@@ -206,6 +228,39 @@ public class SaveSlotManager : MonoBehaviour
                 SaveCurrentGame();
                 autoSaveTimer = 0f;
             }
+            totalGameTimer += Time.deltaTime;
+            if (totalGameTimer >= 1f)
+            {
+                int secondsToAdd = Mathf.FloorToInt(totalGameTimer);
+                currentSave.playTime += secondsToAdd;
+                totalGameTimer -= secondsToAdd;
+
+                if (currentSave.playTime % 10 == 0)
+                {
+                    SaveCurrentGame();
+                }
+            }
+        }
+    }
+    [ContextMenu("Debug/Show Current Config")]
+    public void ShowCurrentConfig()
+    {
+        if (currentSave != null)
+        {
+            var s = currentSave.droneSettings;
+            Debug.Log($"=== ТЕКУЩИЕ НАСТРОЙКИ В ПРОФИЛЕ ===\n" +
+                      $"MaxSpeed: {s.maxSpeed}\n" +
+                      $"Acceleration: {s.acceleration}\n" +
+                      $"RotationSpeed: {s.rotationSpeed}\n" +
+                      $"BatteryLife: {s.batteryLife}\n" +
+                      $"ObstaclePenalty: {s.obstaclePenalty}\n" +
+                      $"Drag: {s.drag}\n" +
+                      $"HoverHeight: {s.hoverHeight}\n" +
+                      $"HoverForce: {s.hoverForce}");
+        }
+        else
+        {
+            Debug.Log("currentSave is null!");
         }
     }
 
